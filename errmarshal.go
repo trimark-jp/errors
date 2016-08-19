@@ -13,7 +13,17 @@ func (e *errMarshal) MarshalJSON() ([]byte, error) {
 		return m.MarshalJSON()
 	}
 	if e.err == nil {
-		return json.Marshal(nil)
+		obj := struct {
+			Message string `json:"message"`
+		}{
+			Message: "",
+		}
+		return json.Marshal(&obj)
 	}
-	return json.Marshal(e.err.Error())
+	obj := struct {
+		Message string `json:"message"`
+	}{
+		Message: e.err.Error(),
+	}
+	return json.Marshal(&obj)
 }

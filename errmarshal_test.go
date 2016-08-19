@@ -13,8 +13,8 @@ func TestMarhsalNil(t *testing.T) {
 
 	b, _ := json.Marshal(e)
 	s := string(b)
-	if s != "null" {
-		t.Log("marshalled nil wrong")
+	if s != `{"message":""}` {
+		t.Fatal("marshalled nil wrong")
 	}
 }
 func TestMarshalNormalErr(t *testing.T) {
@@ -27,7 +27,7 @@ func TestMarshalNormalErr(t *testing.T) {
 
 	b, _ := json.Marshal(e)
 	s := string(b)
-	if s != `"`+msg+`"` {
+	if s != `{"message":"`+msg+`"}` {
 		t.Fatal("marshalled nil wrong", s)
 	}
 }
