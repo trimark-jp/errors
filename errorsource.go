@@ -97,7 +97,8 @@ func (e *errorSource) MarshalJSON() ([]byte, error) {
 		IsSource bool        `json:"isSource"`
 	}{
 		Inner: &errMarshal{
-			err: e.inner,
+			err:         e.inner,
+			callerCount: e.callerCount,
 		},
 		Callers:  e.info,
 		Message:  e.source.Error(),

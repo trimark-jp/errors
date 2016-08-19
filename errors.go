@@ -7,9 +7,10 @@ import (
 
 type (
 	errorType struct {
-		inner error
-		msg   string
-		info  *callerInfo
+		inner       error
+		msg         string
+		info        *callerInfo
+		callerCount int
 	}
 )
 
@@ -56,12 +57,21 @@ func (e *errorType) MarshalJSON() ([]byte, error) {
 		Message string      `json:"message"`
 	}{
 		Inner: &errMarshal{
-			err: e.inner,
+			err:         e.inner,
+			callerCount: e.callerCount,
 		},
 		Callers: e.info,
 		Message: e.msg,
 	}
 	return json.Marshal(&obj)
+}
+
+func (e *errorType) setCallerCount(n int) {
+	if m, ok := e.inner.(callerMarshal); ok {
+		m.setCallerCount(n)
+	}
+	e.callerCount = n
+	e.info.setCount(n)
 }
 
 func new(inner error, msg string, skip int) error {

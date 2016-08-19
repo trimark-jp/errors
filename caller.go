@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"fmt"
 	"runtime"
 )
@@ -12,7 +13,8 @@ type (
 		Function string `json:"function"`
 	}
 	callerInfo struct {
-		Items []*callerInfoItem `json:"items"`
+		Items       []*callerInfoItem `json:"items"`
+		outputCount int
 	}
 )
 
@@ -28,6 +30,10 @@ func (c *callerInfo) String() string {
 
 	first := c.Items[0]
 	return fmt.Sprintf("%s:%d:%s", first.File, first.Line, first.Function)
+}
+
+func (c *callerInfo) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.Items[:c.outputCount])
 }
 
 func caller(skip int) *callerInfo {
@@ -51,4 +57,15 @@ func caller(skip int) *callerInfo {
 		result.Items[index] = item
 	}
 	return result
+}
+
+func (c *callerInfo) setCount(n int) {
+	count := n
+	if len(c.Items) < count {
+		count = len(c.Items)
+	}
+	if count < 0 {
+		count = 0
+	}
+	c.outputCount = count
 }

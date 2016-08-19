@@ -1,11 +1,25 @@
 package errors
 
-import (
-	"encoding/json"
+import "encoding/json"
+
+type (
+	errMarshal struct {
+		err         error
+		callerCount int
+	}
+
+	callerMarshal interface {
+		json.Marshaler
+		setCallerCount(int)
+	}
 )
 
-type errMarshal struct {
-	err error
+func (e *errMarshal) setCallerCount(n int) {
+	if m, ok := e.err.(callerMarshal); ok {
+		m.setCallerCount(n)
+	} else {
+	}
+	e.callerCount = n
 }
 
 func (e *errMarshal) MarshalJSON() ([]byte, error) {
@@ -13,12 +27,7 @@ func (e *errMarshal) MarshalJSON() ([]byte, error) {
 		return m.MarshalJSON()
 	}
 	if e.err == nil {
-		obj := struct {
-			Message string `json:"message"`
-		}{
-			Message: "",
-		}
-		return json.Marshal(&obj)
+		return json.Marshal(nil)
 	}
 	obj := struct {
 		Message string `json:"message"`

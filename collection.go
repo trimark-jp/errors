@@ -9,7 +9,8 @@ import (
 type (
 	// collection has a list of errors.
 	collection struct {
-		errs []error
+		errs        []error
+		callerCount int
 	}
 )
 
@@ -58,16 +59,17 @@ func Merge(l error, r error) error {
 
 // MarshalJSON implements json.Marshaler interface.
 func (c *collection) MarshalJSON() ([]byte, error) {
-
 	obj := struct {
 		Errs []*errMarshal `json:"errors"`
 	}{
 		Errs: make([]*errMarshal, len(c.errs)),
 	}
 	for index, e := range c.errs {
-		obj.Errs[index] = &errMarshal{
-			err: e,
+		em := &errMarshal{
+			err:         e,
+			callerCount: c.callerCount,
 		}
+		obj.Errs[index] = em
 	}
 	return json.Marshal(&obj)
 }
@@ -116,4 +118,13 @@ func (c *collection) explicitSource() error {
 		}
 	}
 	return nil
+}
+
+func (c *collection) setCallerCount(n int) {
+	for _, e := range c.errs {
+		if m, ok := e.(callerMarshal); ok {
+			m.setCallerCount(n)
+		}
+	}
+	c.callerCount = n
 }

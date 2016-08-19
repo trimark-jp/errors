@@ -1,9 +1,6 @@
 package errors
 
-import (
-	"errors"
-	"testing"
-)
+import "testing"
 
 func TestTrace(t *testing.T) {
 	const (
@@ -33,7 +30,5 @@ func TestTrace(t *testing.T) {
 	e := Wrap(c, "most out")
 
 	t.Log(Trace(e))
-	t.Log(Trace(nil))
-	t.Log(Trace(errors.New("normal error")))
-	t.Log(Trace(New("normal error")))
+	t.Log(TraceWithStack(e, 1))
 }
