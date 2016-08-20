@@ -26,6 +26,10 @@ func JSONAll(err error) (string, error) {
 
 // JSONWithStack returns a json string which has error trace.
 func JSONWithStack(err error, stackCount int) (string, error) {
+	if err == nil {
+		return "", nil
+	}
+
 	em := &errMarshal{
 		err: err,
 	}
