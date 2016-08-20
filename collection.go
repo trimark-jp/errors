@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -140,4 +141,20 @@ func (c *collection) StringWithLocation() string {
 	}
 	return fmt.Sprintf(collectionStringFormat,
 		strings.Join(msgs, collectionSeparator))
+}
+
+func (c *collection) stringWithInner(indent string) string {
+	buf := &bytes.Buffer{}
+
+	fmt.Fprintln(buf, indent+"[")
+	innerIndent := indent + StringWithInnerIndent
+	for index, e := range c.errs {
+		if 0 < index {
+			fmt.Fprintln(buf, innerIndent+",")
+		}
+		fmt.Fprint(buf, stringWithInner(e, innerIndent))
+	}
+	fmt.Fprintln(buf, indent+"]")
+
+	return buf.String()
 }

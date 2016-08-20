@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -8,20 +9,23 @@ import (
 var (
 	// StringWithLocationFormat is the format for StringWithLocation.
 	StringWithLocationFormat = "%s\t%s"
+
+	// StringWithInnerIndent is indent for inner errors.
+	StringWithInnerIndent = "\t"
 )
 
-// Trace returns a json string which has error trace.
-func Trace(err error) (string, error) {
-	return TraceWithStack(err, 1)
+// JSON returns a json string which has error trace.
+func JSON(err error) (string, error) {
+	return JSONWithStack(err, 1)
 }
 
-// TraceAll returns a json string which has error trace.
-func TraceAll(err error) (string, error) {
-	return TraceWithStack(err, CallerInfoMaxStack)
+// JSONAll returns a json string which has error trace.
+func JSONAll(err error) (string, error) {
+	return JSONWithStack(err, CallerInfoMaxStack)
 }
 
-// TraceWithStack returns a json string which has error trace.
-func TraceWithStack(err error, stackCount int) (string, error) {
+// JSONWithStack returns a json string which has error trace.
+func JSONWithStack(err error, stackCount int) (string, error) {
 	em := &errMarshal{
 		err: err,
 	}
@@ -39,8 +43,46 @@ func StringWithLocation(err error) string {
 	if e, ok := err.(*errorType); ok {
 		return fmt.Sprintf(StringWithLocationFormat, e.info.String(), e.Error())
 	}
+	if e, ok := err.(*errorSource); ok {
+		return fmt.Sprintf(StringWithLocationFormat, e.info.String(), e.Error())
+	}
 	if c, ok := err.(*collection); ok {
 		return c.StringWithLocation()
 	}
 	return err.Error()
+}
+
+// StringWithInner inner returns string representation of the error and inner errors.
+func StringWithInner(err error) string {
+	if err == nil {
+		return ""
+	}
+	return stringWithInner(err, "")
+}
+
+func stringWithInner(err error, indent string) string {
+	buf := &bytes.Buffer{}
+
+	if e, ok := err.(*errorType); ok {
+		fmt.Fprintln(buf, indent+StringWithLocation(err))
+		if e.inner != nil {
+			fmt.Fprint(buf, stringWithInner(e.inner, indent+StringWithInnerIndent))
+		}
+		return buf.String()
+	}
+	if e, ok := err.(*errorSource); ok {
+		fmt.Fprintln(buf, indent+StringWithLocation(err))
+		if e.inner != nil {
+			fmt.Fprint(buf, stringWithInner(e.inner, indent+StringWithInnerIndent))
+		}
+		return buf.String()
+	}
+
+	if c, ok := err.(*collection); ok {
+		fmt.Fprint(buf, c.stringWithInner(indent+StringWithInnerIndent))
+		return buf.String()
+	}
+
+	fmt.Fprintln(buf, indent+StringWithLocation(err))
+	return buf.String()
 }

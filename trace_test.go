@@ -1,6 +1,9 @@
 package errors
 
-import "testing"
+import (
+	"io"
+	"testing"
+)
 
 func TestTrace(t *testing.T) {
 	const (
@@ -29,8 +32,8 @@ func TestTrace(t *testing.T) {
 
 	e := Wrap(c, "most out")
 
-	t.Log(Trace(e))
-	t.Log(TraceWithStack(e, 1))
+	t.Log(JSON(e))
+	t.Log(JSONWithStack(e, 1))
 }
 
 func TestStringWithLocation(t *testing.T) {
@@ -43,7 +46,8 @@ func TestStringWithLocation(t *testing.T) {
 		rightOuterMessage  = "right outer"
 	)
 
-	li := New(leftInnerMessage)
+	other := io.ErrClosedPipe
+	li := Wrap(other, leftInnerMessage)
 	lm := Wrap(li, leftMiddleMessage)
 	lo := Wrap(lm, leftOuterMessage)
 
@@ -60,6 +64,7 @@ func TestStringWithLocation(t *testing.T) {
 
 	e := Wrap(c, "most out")
 
-	t.Log(StringWithLocation(e))
-	t.Log(StringWithLocation(c))
+	// t.Log(StringWithLocation(e))
+	// t.Log(StringWithLocation(c))
+	t.Log(StringWithInner(e))
 }
