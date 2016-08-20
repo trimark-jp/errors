@@ -14,10 +14,6 @@ type (
 	}
 )
 
-const (
-	descriptionFormat = "%s\t%s"
-)
-
 // Error implements error interface.
 func (e *errorType) Error() string {
 	return e.msg

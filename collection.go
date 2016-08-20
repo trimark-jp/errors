@@ -128,3 +128,16 @@ func (c *collection) setCallerCount(n int) {
 	}
 	c.callerCount = n
 }
+
+func (c *collection) StringWithLocation() string {
+	if len(c.errs) <= 0 {
+		return ""
+	}
+
+	msgs := make([]string, len(c.errs))
+	for index, e := range c.errs {
+		msgs[index] = StringWithLocation(e)
+	}
+	return fmt.Sprintf(collectionStringFormat,
+		strings.Join(msgs, collectionSeparator))
+}

@@ -1,6 +1,14 @@
 package errors
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
+
+var (
+	// StringWithLocationFormat is the format for StringWithLocation.
+	StringWithLocationFormat = "%s\t%s"
+)
 
 // Trace returns a json string which has error trace.
 func Trace(err error) (string, error) {
@@ -20,4 +28,19 @@ func TraceWithStack(err error, stackCount int) (string, error) {
 	em.setCallerCount(stackCount)
 	b, e := json.Marshal(em)
 	return string(b), e
+}
+
+// StringWithLocation returns error location and error message as string.
+func StringWithLocation(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	if e, ok := err.(*errorType); ok {
+		return fmt.Sprintf(StringWithLocationFormat, e.info.String(), e.Error())
+	}
+	if c, ok := err.(*collection); ok {
+		return c.StringWithLocation()
+	}
+	return err.Error()
 }
