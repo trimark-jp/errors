@@ -27,6 +27,11 @@ func NewAsSourcef(format string, a ...interface{}) error {
 	return newSource(nil, new(nil, fmt.Sprintf(format, a...), 1), 1)
 }
 
+// AsSource returns a new source error.
+func AsSource(err error) error {
+	return newSource(nil, err, 1)
+}
+
 // WrapBySourceError returns a new error.
 // If the error is passed to errors.SourceOf function,
 // returns the source.
