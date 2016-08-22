@@ -29,6 +29,9 @@ func NewAsSourcef(format string, a ...interface{}) error {
 
 // AsSource returns a new source error.
 func AsSource(err error) error {
+	if err == nil {
+		return nil
+	}
 	return newSource(nil, err, 1)
 }
 
